@@ -15,23 +15,16 @@ library(ggplot2)
 
 
 # load data
-SA2 <- st_read('data/geospatial_data.shp') #%>% # read data
+SA2 <- st_read('data/geospatial_data.shp') # read geospatial data
+commute_pivot <- readRDS("data/commute_data") # read commuting data
 
-#commute_data <- read.csv("../statsnz2018-census-main-means-of-travel-to-work-by-statistical-area-CSV/2018-census-main-means-of-travel-to-work-by-statistical-area.csv", na.strings = "-999")
-#commute_data <- readRDS("../data/commute_clip")
-#coming_going <- readRDS("../data/coming_going")
-
-#coming_going_join <-
-#  left_join(SA2, coming_going, by = c("ID" = "ID_WORK"))
-
-#commute_pct <- readRDS("../data/commute_pct")
-#commute_pct_join <-left_join(SA2, commute_pct, by="ID")
-
-commute_pivot <- readRDS("data/commute_data")
+# join data
 commute_pivot_join <-left_join(SA2, commute_pivot, by="ID")
 
+# remove outside of Dunedin
 commute_pivot_join<- commute_pivot_join %>% filter(ID != "000100")
 
+# functions
 addLegend_decreasing <- function (map, position = c("topright", "bottomright", "bottomleft",
     "topleft"), pal, values, na.label = "NA", bins = 7, colors,
     opacity = 0.5, labels = NULL, labFormat = labelFormat(),
@@ -136,23 +129,6 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
     invokeMethod(map, data, "addLegend", legend)
 }
 
-
-# commute type
-commute_type <- c(
-    "Driving (including carpooling)" = "drive",
-    "Public bus" = "bus",
-    "Bicycle" = "bike",
-    "On Foot" = "onfoot",
-    "Work at home" = "wfh"
-)
-
-output_type <- c(
-    "Commuting Score" = "score",
-    "Commuting Percent" = "percent"
-
-
-)
-
 # mode to Score
 Score_title <- function(trans_mode){
     if (trans_mode== "bike") {
@@ -168,6 +144,7 @@ Score_title <- function(trans_mode){
     }
 }
 
+# mode to verb
 mode_verb <- function(trans_mode){
     if (trans_mode== "bike") {
         return("cycling")
@@ -182,6 +159,7 @@ mode_verb <- function(trans_mode){
     }
 }
 
+# mode to verb
 mode_verb_2 <- function(trans_mode){
     if (trans_mode== "bike") {
         return("cycle")
@@ -197,6 +175,20 @@ mode_verb_2 <- function(trans_mode){
 }
 
 
+first_load = TRUE
+# commute type
+commute_type <- c(
+    "Driving (including carpooling)" = "drive",
+    "Public bus" = "bus",
+    "Bicycle" = "bike",
+    "On Foot" = "onfoot",
+    "Work at home" = "wfh"
+)
+
+output_type <- c(
+    "Commuting Score" = "score",
+    "Commuting Percent" = "percent"
+)
 
 ui <- fluidPage(navbarPage(
     "How Dunedin Gets to Work",
@@ -214,20 +206,20 @@ ui <- fluidPage(navbarPage(
                 id = "controls",
                 class = "panel panel-default",
                 fixed = TRUE,
-                draggable = TRUE,
-                top = 60,
+                draggable = FALSE,
+                top = 150,
                 left = "auto",
-                right = 20,
+                right = 5,
                 bottom = "auto",
-                width = 400,
+                width = 350,
                 height = "auto",
-                h3("How Dunedin gets to work based on where people live"),
+                #h3("How Dunedin gets to work"),
                 h4(selectInput("commuteType", "Transportation Mode", commute_type)),
                 #h4(selectInput("outputType", "Output type", output_type)),
-                h4(textOutput("name")),
-                textOutput("percent"),
-                h4(textOutput("score")),
-                textOutput("sentence")
+                #h4(textOutput("name")),
+                #textOutput("percent"),
+                #h4(textOutput("score")),
+                #textOutput("sentence")
             )
         ),
         tags$div(
@@ -238,9 +230,45 @@ ui <- fluidPage(navbarPage(
         )
     ),
     tabPanel(
-        "About",
+        "Info",
         mainPanel(
-            h2("About this App"),
+            h2("What scores mean"),
+            p("Scores represent how much (or how little) commuters travel by a transportation mode (for example by bus or by driving) compared to the city average."),
+            p(strong("Positive scores"), "indicate that commuters in that area use that mode", strong("more than the city average.")),
+            p(strong("Negative scores"), "indicate that commuters in that area use that mode", strong("less than the city average.")),
+            img(src = "score_example_1_edit.png", alt = "Postives scores are above city average, negative scores are below city average"),
+            h2("How scores are calculated"),
+            withMathJax(),
+            helpText('$$S = W - T \\cdot A$$'),
+            p("The score",
+                em("(S)"),
+                "is the number of workers",
+                em("(W)"),
+                "using the transportation mode from that area, minus the total",
+                em("(T)"),
+                "number of workers from that area, times the city average",
+                em("(A)"),
+                "rate for the transportation mode."),
+            p("For example if an area has 100 workers total",
+                em("(T)"),
+                "and 30 of them walk or jog to work",
+                em("(W)"),
+                "and the city average workers walking or jogging work",
+                em("(A)"),
+                "is 10%. Then the score",
+                em("(S)"),
+                "would be 20."
+                ),
+            helpText('$$S = 30 - 100 \\cdot 10 \\% = 20 $$'),
+            p("If that same area only have 5 workers walking or jogging to work",
+                em("(W)"),
+                "then the score",
+                em("(S)"),
+                "would be -5."
+            ),
+            helpText('$$S = 5 - 100 \\cdot 10 \\% = -5 $$'),
+
+            h2("About this app"),
             p(em("How Dunedin Gets to Work"), "was built for the", a("There and back again",
                 href = "https://www.stats.govt.nz/2018-census/there-and-back-again-data-visualisation-competition"),
                 "data visualisation competition by", a("Stats NZ", href="https://www.stats.govt.nz/")
@@ -265,9 +293,6 @@ ui <- fluidPage(navbarPage(
                 a("adam-campbell.com", href = "https://www.adam-campbell.com/")
             ),
             p("- Adam J. Campbell"),
-
-
-            #i(class="far fa-heart"),
             h4("Data"),
             p(a("2018 Census Main means of travel to work by Statistical Area 2", href = "https://datafinder.stats.govt.nz/table/104720-2018-census-main-means-of-travel-to-work-by-statistical-area-2/"),
                 "by",
@@ -280,91 +305,170 @@ ui <- fluidPage(navbarPage(
                 a("Stats NZ", href = "https://www.stats.govt.nz/")),
             h4("Thanks"),
             p("Special thanks to Grandy Li and Jon Bapst for providing very helpful feedback and suggestions for improvements.")
-
-
-
         )
     )
 ))
 
 server <- function(input, output, session) {
-
-
     observe({
         leafletProxy("map") %>% clearPopups()
+        #leafletProxy("map") %>% removeShape("higlih")
+        travel_mode = input$commuteType
         event <- input$map_shape_click
         if (is.null(event))
             return()
         isolate({
-            #showPopup(event$id, event$lat, event$lng)
+            showPopup(event$id, event$lat, event$lng)
             #showTravel(event$id)
+            updateMap(event$id, travel_mode)
         })
     })
     showPopup <- function(SA_num, lat, lng) {
-        selectedSA <- SA2 %>% filter(ID == SA_num)
+
+        trans_mode <- input$commuteType
+
+        total_commute_from_citywide <- commute_pivot %>% filter(direction == "from", type == "sum") %>% summarise(citywide = sum(value))
+        total_commute_from_mode <- commute_pivot %>% filter(direction == "from", type == "sum", mode== trans_mode) %>% summarise(onmode = sum(value))
+        pct_city <-total_commute_from_mode / total_commute_from_citywide
+
+        # make title
+        my_title = if (input$commuteType== "bike") {
+            "Cycling Score"
+        } else if (input$commuteType== "drive") {
+            "Driving Score"
+        } else if (input$commuteType== "bus") {
+            "Bus Score"
+        } else if (input$commuteType== "onfoot") {
+            "Walking and Jogging Score"
+        } else{
+            "Working at Home Score"
+        }
+
+        diff <-commute_pivot_join %>%filter(ID == SA_num, direction == "from", mode == input$commuteType, type == "diff") %>%select(value) %>% st_drop_geometry()
+
+
+        pct <- commute_pivot_join %>%
+            filter(direction == "from", ID == SA_num, mode == input$commuteType, type == 'pct') %>%
+            select(value) %>%
+            st_drop_geometry()
+        if (input$commuteType == "wfh") {
+            sentence = paste(
+                round(pct*100, digits = 1),
+                "% of workers living here typically work at home, compared to ",
+                round(pct_city*100, digits = 1),
+                "% citywide.",
+                sep ="")
+        }
+        else {
+            sentence = paste(
+                round(pct*100, digits = 1),
+                "% of workers living here typically get to work by ",
+                mode_verb(trans_mode),
+                ", compared to ",
+                round(pct_city*100, digits = 1),
+                "% citywide.",
+                sep ="")
+        }
+
+
         content <- as.character(tagList(
-            tags$h4("Statistical Area:", as.character(selectedSA$ID_NAME),
-                "num items: " , as.character(nrow(selectedSA)))
+            tags$h4(as.character(SA2 %>% filter(ID == SA_num) %>% select(ID_NAME) %>% st_drop_geometry())),
+            tags$strong(my_title, ":", as.character(round(diff))),
+            tags$p(sentence)
         ))
+
+
+
+
         leafletProxy("map") %>% addPopups(lng, lat, content, layerId = "ID")
     }
 
-    showTravel <- function(SA_num){
-        commuteType_server <- input$commuteType
-
-        commute_subset <- commute_data %>%
-            filter(commute_data$ID_RES == SA_num)
-        display <- left_join(SA2, commute_subset, by=c("ID" = "ID_WORK")) %>%
-            mutate(highlight_stroke = ifelse(ID == SA_num, 3, 1)) %>%
-            mutate(stroke_color = ifelse(ID == SA_num, "black", "grey"))
-        home_SA <- SA2 %>%
-            filter(SA2$ID == SA_num)
-        #display <- left_join(SA2, commute_subset, by="ID_RES")
-
-        if (commuteType_server == "total") { display$active <- display$Total}
-        else if (commuteType_server == "bus"){display$active <- display$Public_bus}
-        else if (commuteType_server == "wfh"){display$active <- display$Work_at_home}
-        else if (commuteType_server == "DrivePrivate"){display$active <- display$Drive_a_private_car_truck_or_van}
-        else if (commuteType_server == "DriveCompany"){display$active <- display$Drive_a_company_car_truck_or_van}
-        else if (commuteType_server == "passenger"){display$active <- display$Passenger_in_a_car_truck_van_or_company_bus}
-        else if (commuteType_server == "train"){display$active <- display$Train}
-        else if (commuteType_server == "bike"){display$active <- display$Bicycle}
-        else if (commuteType_server == "walk"){display$active <- display$Walk_or_jog}
-        else if (commuteType_server == "ferry"){display$active <- display$Ferry}
-        else if (commuteType_server == "other"){display$active <- display$Other}
-
-        pal <- colorNumeric(
-            palette = "Oranges",
-            domain = commute_subset$active)
-
-
+    # showTravel <- function(SA_num){
+    #     commuteType_server <- input$commuteType
+    #
+    #     commute_subset <- commute_data %>%
+    #         filter(commute_data$ID_RES == SA_num)
+    #     display <- left_join(SA2, commute_subset, by=c("ID" = "ID_WORK")) %>%
+    #         mutate(highlight_stroke = ifelse(ID == SA_num, 3, 1)) %>%
+    #         mutate(stroke_color = ifelse(ID == SA_num, "black", "grey"))
+    #     home_SA <- SA2 %>%
+    #         filter(SA2$ID == SA_num)
+    #     #display <- left_join(SA2, commute_subset, by="ID_RES")
+    #
+    #     if (commuteType_server == "total") { display$active <- display$Total}
+    #     else if (commuteType_server == "bus"){display$active <- display$Public_bus}
+    #     else if (commuteType_server == "wfh"){display$active <- display$Work_at_home}
+    #     else if (commuteType_server == "DrivePrivate"){display$active <- display$Drive_a_private_car_truck_or_van}
+    #     else if (commuteType_server == "DriveCompany"){display$active <- display$Drive_a_company_car_truck_or_van}
+    #     else if (commuteType_server == "passenger"){display$active <- display$Passenger_in_a_car_truck_van_or_company_bus}
+    #     else if (commuteType_server == "train"){display$active <- display$Train}
+    #     else if (commuteType_server == "bike"){display$active <- display$Bicycle}
+    #     else if (commuteType_server == "walk"){display$active <- display$Walk_or_jog}
+    #     else if (commuteType_server == "ferry"){display$active <- display$Ferry}
+    #     else if (commuteType_server == "other"){display$active <- display$Other}
+    #
+    #     pal <- colorNumeric(
+    #         palette = "Oranges",
+    #         domain = commute_subset$active)
+    #
+    #
+    #     leafletProxy("map") %>%
+    #         addPolygons(data = display,
+    #             color = ~stroke_color,
+    #             fillColor = ~pal(active),
+    #             weight = ~highlight_stroke,
+    #             layerId=~ID,
+    #             smoothFactor = 0.5,
+    #             opacity = 1.0,
+    #             stroke = TRUE,
+    #             fillOpacity = 0.5,
+    #             label = ~ID_NAME,
+    #             highlightOptions = highlightOptions(color = "white",
+    #                 weight = 2,
+    #                 bringToFront = TRUE)) %>%
+    #         addLegend("bottomright",
+    #             data = display,
+    #             pal = pal,
+    #             layerId = 'my_legend',
+    #             values = ~active,
+    #             #title = "foo",
+    #             title =  as.character(tagList(
+    #                 tags$h4("Number of", as.character(home_SA$ID_NAME), " residents working in highlighted areas"),
+    #
+    #             )),
+    #             opacity = 0.5)
+    #
+    # }
+    #
+    updateMap <- function(SA_num, travel_mode)
+    {
+        value_range <- commute_pivot_join %>%filter(direction == "from", mode == travel_mode, type == "diff") %>%select(value) %>% st_drop_geometry()
+        diff = max(value_range)+min(value_range)
+        pale <- colorNumeric(
+            palette = "RdBu",
+            reverse = if (input$commuteType == "drive" ) {TRUE} else {FALSE},
+            #reverse = TRUE,
+            domain = if (abs(min(value_range))> abs(max(value_range)) ){c(-min(value_range),min(value_range))}else {c(-max(value_range),max(value_range))}
+        )
         leafletProxy("map") %>%
-            addPolygons(data = display,
-                color = ~stroke_color,
-                fillColor = ~pal(active),
-                weight = ~highlight_stroke,
-                layerId=~ID,
-                smoothFactor = 0.5,
-                opacity = 1.0,
-                stroke = TRUE,
-                fillOpacity = 0.5,
-                label = ~ID_NAME,
-                highlightOptions = highlightOptions(color = "white",
-                    weight = 2,
-                    bringToFront = TRUE)) %>%
-            addLegend("bottomright",
-                data = display,
-                pal = pal,
-                layerId = 'my_legend',
-                values = ~active,
-                #title = "foo",
-                title =  as.character(tagList(
-                    tags$h4("Number of", as.character(home_SA$ID_NAME), " residents working in highlighted areas"),
-
-                )),
-                opacity = 0.5)
-
+            addPolygons(
+                data = commute_pivot_join  %>% filter(direction == "from",  mode == travel_mode, type == "diff", ID == SA_num),
+                color = "black",
+                fill= FALSE,
+                weight = 3,
+                layerId="highlight",
+                smoothFactor = 1,
+                opacity = 1,
+                #label = labels,
+                label = ~ID,
+                labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto"),
+                fillOpacity = 0.7
+            )
     }
+
 
     output$map <- renderLeaflet({
 
@@ -373,11 +477,13 @@ server <- function(input, output, session) {
         diff = max(value_range)+min(value_range)
         pale_rev <- colorNumeric(
             palette = "RdBu",
+            #reverse = if (input$commuteType == "drive" ) {FALSE} else {TRUE},
             reverse = TRUE,
             domain = if (abs(min(value_range))> abs(max(value_range)) ){c(-min(value_range)+diff,min(value_range)+diff)}else {c(-max(value_range)+diff,max(value_range)+diff)}
         )
         pale <- colorNumeric(
             palette = "RdBu",
+            #reverse = if (input$commuteType == "drive" ) {TRUE} else {FALSE},
             reverse = FALSE,
             domain = if (abs(min(value_range))> abs(max(value_range)) ){c(-min(value_range),min(value_range))}else {c(-max(value_range),max(value_range))}
         )
@@ -401,8 +507,7 @@ server <- function(input, output, session) {
                 options = providerTileOptions(noWrap = TRUE)
             ) %>%
 
-            setView(170.5, -45.88, zoom = 12) %>%  # Dunedin
-
+            setView(170.5, -45.86, zoom = 12) %>%  # Dunedin
 
             addPolygons(
                 color = "grey",
@@ -417,10 +522,10 @@ server <- function(input, output, session) {
                     style = list("font-weight" = "normal", padding = "3px 8px"),
                     textsize = "15px",
                     direction = "auto"),
-                fillOpacity = 0.7,
-                highlightOptions = highlightOptions(color = "black",
-                    weight = 2,
-                    bringToFront = TRUE)
+                fillOpacity = 0.7
+                # highlightOptions = highlightOptions(color = "black",
+                #     weight = 2,
+                #     bringToFront = FALSE)
             ) %>%
             addLegend_decreasing(
                 position = "bottomright",
@@ -428,8 +533,9 @@ server <- function(input, output, session) {
                 values = ~value,
                 opacity = 0.7,
                 title = my_title
-            )
+                )
     })
+
 
 
     output$barPlotfrom <- renderPlot({
