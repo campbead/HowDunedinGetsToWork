@@ -292,8 +292,7 @@ ui <- fluidPage(navbarPage(
                 "or check my personal website: ",
                 a("adam-campbell.com", href = "https://www.adam-campbell.com/")
             ),
-            p("- Adam J. Campbell"),
-            h4("Data"),
+            h2("Data"),
             p(a("2018 Census Main means of travel to work by Statistical Area 2", href = "https://datafinder.stats.govt.nz/table/104720-2018-census-main-means-of-travel-to-work-by-statistical-area-2/"),
                 "by",
                 a("Stats NZ", href = "https://www.stats.govt.nz/")),
@@ -303,8 +302,9 @@ ui <- fluidPage(navbarPage(
             p(a("Territorial Authority 2018 (generalised)", href = "https://datafinder.stats.govt.nz/layer/92214-territorial-authority-2018-generalised/"),
                 "by",
                 a("Stats NZ", href = "https://www.stats.govt.nz/")),
-            h4("Thanks"),
-            p("Special thanks to Grandy Li and Jon Bapst for providing very helpful feedback and suggestions for improvements.")
+            h2("Thanks"),
+            p("Special thanks to Grandy Li and Jon Bapst for providing very helpful feedback and suggestions for improvements."),
+            p("Copyright (c) 2020 Adam J Campbell")
         )
     )
 ))
