@@ -271,7 +271,7 @@ ui <- fluidPage(navbarPage(
                 a("tidyverse packages.", href = "https://www.tidyverse.org/")
             ),
             p("This app is open source and available at",
-                a("Github.",href = "https://github.com/campbead/") ),
+                a("Github.",href = "https://github.com/campbead/HowDunedinGetsToWork") ),
             p("If you like this, please consider reaching out to me on Twitter ",
                 a("(@campbead)", href = "https://twitter.com/campbead"),
                 "or check my personal website: ",
