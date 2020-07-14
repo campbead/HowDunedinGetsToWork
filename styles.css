@@ -57,3 +57,87 @@ h4 {
 .leaflet-container {
   background-color: white !important;
 }
+
+.navbar-default, .navbar-default > div:hover{
+    background-color: #0B7A7D;
+    border-color: #3d3c3c;
+}
+
+.navbar-default .navbar-brand,  .navbar-default .navbar-brand > span:hover {
+    color: white;
+}
+
+.navbar-default .navbar-brand:hover span,  .navbar-default .navbar-brand:focus  span{
+    color: white;
+}
+
+.navbar-default .navbar-brand> span:hover,  .navbar-default .navbar-brand > span:focus {
+    color: white;
+}
+
+.navbar-default .navbar-brand:hover,  .navbar-default .navbar-brand:focus {
+    color: white;
+}
+
+
+.navbar-default .navbar-nav{
+    color: white;
+    background-color: #0B7A7D;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+    background-color: white;
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
+    color: white;
+    background-color:  #0B7A7D;
+}
+
+.navbar-default .navbar-nav > li > a, .navbar-default .navbar-nav > li > a:hover {
+    color: white;
+}
+
+.navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
+    background-color: #0B7A7D;
+}
+.navbar-default .navbar-toggle {
+    border-color: white;
+}
+
+.leaflet-top .leaflet-control {
+    margin-top: 20px;
+}
+
+
+/* Inline #6 | http://127.0.0.1:6225/ */
+
+#cite {
+  /* bottom: 10px; */
+  bottom: 30px;
+  right: 2px;
+}
+
+/* leaflet.css | http://127.0.0.1:6225/leaflet-1.3.1/leaflet.css */
+
+.leaflet-bottom .leaflet-control {
+  /* margin-bottom: 10px; */
+  margin-bottom: 40px;
+}
+
+.leaflet-container .leaflet-control-attribution, .leaflet-container .leaflet-control-scale {
+    font-size: 11px;
+    margin-bottom: 0px
+}
+
+
+/*
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover {
+    color: #e8e2e1;
+    background-color: #73346a;
+}
+.navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
+    color: #e8e2e1;
+    background-color: transparent;
+}
+*/
