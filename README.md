@@ -10,6 +10,6 @@ This app is open source and available at [Github](https://github.com/campbead/Ho
 
 If you like this, please consider reaching out to me on [Twitter](https://twitter.com/campbead) or check my personal website: [adam-campbell.com](https://www.adam-campbell.com/)
 
-`app.R` contains the Shiny app
-`preprocess_data.Rmd` processes census data into the scoring data in the Shiny app
-`submission_description.txt` is the Submission Description text supplied for the competition.
+- `app.R` contains the Shiny app
+- `preprocess_data.Rmd` processes census data into the scoring data in the Shiny app
+- `submission_description.txt` is the Submission Description text supplied for the competition.
