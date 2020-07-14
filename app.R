@@ -142,7 +142,7 @@ mode_verb <- function(trans_mode){
     } else if (trans_mode== "drive") {
         return("driving")
     } else if (trans_mode== "bus") {
-        return("bussing")
+        return("public bus")
     } else if (trans_mode== "onfoot") {
         return("walking or jogging")
     } else{
@@ -169,7 +169,7 @@ mode_verb_2 <- function(trans_mode){
 first_load = TRUE
 # commute type
 commute_type <- c(
-    "Driving (including carpooling)" = "drive",
+    "Driving" = "drive",
     "Public bus" = "bus",
     "Bicycle" = "bike",
     "On Foot" = "onfoot",
@@ -198,13 +198,14 @@ ui <- fluidPage(navbarPage(
                 class = "panel panel-default",
                 fixed = TRUE,
                 draggable = FALSE,
-                top = 150,
+                top = 60,
                 left = "auto",
                 right = 5,
                 bottom = "auto",
-                width = 350,
+                width = 300,
                 height = "auto",
-                h4(selectInput("commuteType", "Transportation Mode", commute_type)),
+                h4(selectInput("commuteType", "Transportation Mode", commute_type,
+                    width = 250)),
             )
         ),
         tags$div(
@@ -215,14 +216,21 @@ ui <- fluidPage(navbarPage(
         )
     ),
     tabPanel(
-        "Info",
+        "What scores mean",
         mainPanel(
             h2("What scores mean"),
-            p("Scores represent how much (or how little) commuters travel by a transportation mode (for example by bus or by driving) compared to the city average."),
+            p("Scores represent how much (or how little) commuters ",strong("living in a given area,"), " typically travel to work by a transportation mode (for example by bus or by driving) compared to the city average."),
             p(strong("Positive scores"), "indicate that commuters living in that area use that mode", strong("more than the city average.")),
             p(strong("Negative scores"), "indicate that commuters living in that area use that mode", strong("less than the city average.")),
             img(src = "score_example_1_edit.png", alt = "Postives scores are above city average, negative scores are below city average"),
-            h2("How scores are calculated"),
+
+            h3("Transportation modes"),
+            p("Scores are grouped by transportation modes, for this analysis driving is considered to be driving 'a private car, truck or van' OR driving 'a company car, truck or van', OR being a 'passenger in a car, truck, van or company bus'."),
+            p("Census results for commuting by train, ferry and  other commuting (e.g. taxi, motorbike) are not included because they are negligible in Dunedin."),
+
+
+            h3("How scores are calculated"),
+            p("For a given transportation mode, scores represent the difference between the number of commuters and the number of commuters that would be expected in that area, given a city average."),
             withMathJax(),
             helpText('$$S = W - T \\cdot A$$'),
             p("The score",
@@ -231,35 +239,40 @@ ui <- fluidPage(navbarPage(
                 em("(W)"),
                 "using the transportation mode from that area, minus the total",
                 em("(T)"),
-                "number of workers from that area, times the city average",
+                "number of workers from that area, times the city average rate",
                 em("(A)"),
-                "rate for the transportation mode."),
-            p("For example if an area has 100 workers total",
+                "for the transportation mode."),
+            p("For example, if an area has 100 workers total",
                 em("(T)"),
                 "and 30 of them walk or jog to work",
                 em("(W)"),
-                "and the city average workers walking or jogging work",
+                "and the city average for workers walking or jogging to work",
                 em("(A)"),
                 "is 10%. Then the score",
                 em("(S)"),
                 "would be 20."
-                ),
+            ),
             helpText('$$S = 30 - 100 \\cdot 10 \\% = 20 $$'),
-            p("If that same area only have 5 workers walking or jogging to work",
+            p("If that same area only had 5 workers walking or jogging to work",
                 em("(W)"),
                 "then the score",
                 em("(S)"),
                 "would be -5."
             ),
-            helpText('$$S = 5 - 100 \\cdot 10 \\% = -5 $$'),
+            helpText('$$S = 5 - 100 \\cdot 10 \\% = -5 $$')
 
+        )
+    ),
+    tabPanel(
+        "About this app",
+        mainPanel(
             h2("About this app"),
             p(em("How Dunedin Gets to Work"), "was built for the", a("There and back again",
                 href = "https://www.stats.govt.nz/2018-census/there-and-back-again-data-visualisation-competition"),
                 "data visualisation competition by", a("Stats NZ", href="https://www.stats.govt.nz/")
             ),
-            p("The purpose of this app to allow residents of Dunedin to visualise commuting paterns within thier city.",
-                "I wanted to encourage visitors to reflect on their own transportation choices, while considering their neighbors and wider community.",
+            p("The purpose of this app to allow residents of Dunedin to visualise commuting patterns within their city.",
+                "I wanted to encourage visitors to reflect on their own transportation choices, while considering their neighbours and the wider community.",
                 "I hope this project is a starting point for considering why residents make the choices they make around commuting."),
             p("This app was built using",
                 a("Shiny from RStudio.", href= "https://shiny.rstudio.com/" ),
@@ -277,7 +290,7 @@ ui <- fluidPage(navbarPage(
                 "or check my personal website: ",
                 a("adam-campbell.com", href = "https://www.adam-campbell.com/")
             ),
-            h2("Data"),
+            h3("Data"),
             p(a("2018 Census Main means of travel to work by Statistical Area 2", href = "https://datafinder.stats.govt.nz/table/104720-2018-census-main-means-of-travel-to-work-by-statistical-area-2/"),
                 "by",
                 a("Stats NZ", href = "https://www.stats.govt.nz/")),
@@ -287,11 +300,12 @@ ui <- fluidPage(navbarPage(
             p(a("Territorial Authority 2018 (generalised)", href = "https://datafinder.stats.govt.nz/layer/92214-territorial-authority-2018-generalised/"),
                 "by",
                 a("Stats NZ", href = "https://www.stats.govt.nz/")),
-            h2("Thanks"),
-            p("Special thanks to Grandy Li and Jon Bapst for providing very helpful feedback and suggestions for improvements."),
+            h3("Thanks"),
+            p("Special thanks to Jon Bapst, Ian Bowles, and Grandy Li for providing very helpful feedback and suggestions for improvements."),
             p("Copyright (c) 2020 Adam J Campbell")
         )
-    )
+    ),
+    collapsible = TRUE
 ))
 
 server <- function(input, output, session) {
@@ -435,7 +449,7 @@ server <- function(input, output, session) {
 
             clearPopups()  %>%
 
-            setView(170.5, -45.86, zoom = 12) %>%  # Dunedin
+            setView(170.5, -45.88, zoom = 12) %>%  # Dunedin
 
             addPolygons(
                 color = "grey",
