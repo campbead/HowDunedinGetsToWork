@@ -219,8 +219,8 @@ ui <- fluidPage(navbarPage(
         mainPanel(
             h2("What scores mean"),
             p("Scores represent how much (or how little) commuters travel by a transportation mode (for example by bus or by driving) compared to the city average."),
-            p(strong("Positive scores"), "indicate that commuters in that area use that mode", strong("more than the city average.")),
-            p(strong("Negative scores"), "indicate that commuters in that area use that mode", strong("less than the city average.")),
+            p(strong("Positive scores"), "indicate that commuters living in that area use that mode", strong("more than the city average.")),
+            p(strong("Negative scores"), "indicate that commuters living in that area use that mode", strong("less than the city average.")),
             img(src = "score_example_1_edit.png", alt = "Postives scores are above city average, negative scores are below city average"),
             h2("How scores are calculated"),
             withMathJax(),
@@ -386,7 +386,7 @@ server <- function(input, output, session) {
                 smoothFactor = 1,
                 opacity = 1,
                 #label = labels,
-                label = ~ID,
+                #label = ~ID,
                 labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
                     textsize = "15px",
@@ -433,6 +433,8 @@ server <- function(input, output, session) {
                 options = providerTileOptions(noWrap = TRUE)
             ) %>%
 
+            clearPopups()  %>%
+
             setView(170.5, -45.86, zoom = 12) %>%  # Dunedin
 
             addPolygons(
@@ -443,7 +445,7 @@ server <- function(input, output, session) {
                 smoothFactor = 0.5,
                 opacity = 1,
                 #label = labels,
-                label = ~ID_NAME,
+                #label = ~ID_NAME,
                 labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
                     textsize = "15px",
