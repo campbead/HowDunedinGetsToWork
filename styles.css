@@ -88,15 +88,44 @@ h4 {
 .navbar-default .navbar-toggle .icon-bar {
     background-color: white;
 }
-
+/*
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
     color: white;
     background-color:  #0B7A7D;
 }
+*/
 
+.navbar-default .navbar-nav > .active > a {
+    color: white;
+    background-color:  #085c5e;
+}
+
+.navbar-default .navbar-nav > .active > a:focus{
+    color: white;
+    background-color:  #085c5e;
+}
+
+.navbar-default .navbar-nav > .active > a:hover {
+    color:  #FFC300;
+    background-color:  #085c5e;
+}
+
+/*
 .navbar-default .navbar-nav > li > a, .navbar-default .navbar-nav > li > a:hover {
     color: white;
 }
+*/
+
+.navbar-default .navbar-nav > li > a {
+    color: white;
+}
+
+
+.navbar-default .navbar-nav > li > a:hover {
+    color:  #FFC300;
+}
+
+
 
 .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
     background-color: #0B7A7D;
