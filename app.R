@@ -3,7 +3,7 @@ library(leaflet)
 library(sf)
 library(dplyr)
 library(ggplot2)
-
+library(metathis)
 
 # load data
 SA2 <- st_read('data/geospatial_data.shp') # read geospatial data
@@ -215,6 +215,7 @@ ui <- fluidPage(navbarPage(
             ' from Stats NZ.'
         )
     ),
+
     tabPanel(
         "What scores mean",
         mainPanel(
@@ -306,7 +307,19 @@ ui <- fluidPage(navbarPage(
         )
     ),
     collapsible = TRUE
-))
+),
+    meta() %>%
+        meta_social(
+            title = "How Dunedin Gets to Work",
+            description = "An app for exploring commuting pattern in Dunedin, New Zealand",
+            url = "https://campbead.shinyapps.io/HowDunedinGetsToWork/",
+            image = "https://www.adam-campbell.com/img/Social_image_How_dunedin.png",
+            image_alt = "App overview",
+            twitter_creator = "@campbead",
+            twitter_card_type = "summary",
+            twitter_site = "@campbead"
+        )
+    )
 
 server <- function(input, output, session) {
     observe({
