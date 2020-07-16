@@ -8,6 +8,7 @@ library(metathis)
 # load data
 SA2 <- st_read('data/geospatial_data.shp') # read geospatial data
 commute_pivot <- readRDS("data/commute_data") # read commuting data
+summary_data <- readRDS("data/Dunedin_Summary") # read summary data
 
 # join data
 commute_pivot_join <-left_join(SA2, commute_pivot, by="ID")
@@ -118,6 +119,20 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
         position = position, type = type, title = title, extra = extra,
         layerId = layerId, className = className, group = group)
     invokeMethod(map, data, "addLegend", legend)
+}
+
+pct_summary <- function(trans_mode){
+    if (trans_mode== "bike") {
+        return(summary_data$pct_bike)
+    } else if (trans_mode== "drive") {
+        return(summary_data$pct_drive)
+    } else if (trans_mode== "bus") {
+        return(summary_data$pct_bike)
+    } else if (trans_mode== "onfoot") {
+        return(summary_data$pct_Walk)
+    } else{
+        return(summary_data$pct_WFH)
+    }
 }
 
 # mode to Score
@@ -260,7 +275,9 @@ ui <- fluidPage(navbarPage(
                 em("(S)"),
                 "would be -5."
             ),
-            helpText('$$S = 5 - 100 \\cdot 10 \\% = -5 $$')
+            helpText('$$S = 5 - 100 \\cdot 10 \\% = -5 $$'),
+            h3("Note about data"),
+            p("Census data here has been anonymised by the data supplier, reducing the data’s overall accuracy by undercounting some data.  The total commuters reported in the dataset for Dunedin is 46,002 however the sum of all commuting transportation modes (including “Other”) is 40,788, a discrepancy of 5,214.  Meaning 11% of commuters are unreported by the data supplier.  This means the percentages of travel reported here are likely lower than reality.   This likely disproportionately undercounts less often used modes of transportation (e.g. bus, bicycle).")
 
         )
     ),
@@ -365,7 +382,7 @@ server <- function(input, output, session) {
             sentence = paste(
                 round(pct*100, digits = 1),
                 "% of workers living here typically work at home, compared to ",
-                round(pct_city*100, digits = 1),
+                round(pct_summary(input$commuteType) *100, digits = 0),
                 "% citywide.",
                 sep ="")
         }
@@ -375,7 +392,7 @@ server <- function(input, output, session) {
                 "% of workers living here typically get to work by ",
                 mode_verb(trans_mode),
                 ", compared to ",
-                round(pct_city*100, digits = 1),
+                round(pct_summary(input$commuteType) *100, digits = 0),
                 "% citywide.",
                 sep ="")
         }
