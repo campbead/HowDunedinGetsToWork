@@ -9,7 +9,6 @@ This file will help process the census data into the scoring information in the 
 
 You will need to download the individual shapefiles and census data.
 
-
 Load your packages
 ```{r}
 library(sf)
@@ -36,265 +35,137 @@ commute_data <- read.csv("raw_data/statsnz2018-census-main-means-of-travel-to-wo
   mutate(ID_WORK = as.character(ID_WORK)) 
 ```
 
-
-Read NonDCC shapefile
-```{r}
-SA2_nonDCC <- st_read('raw_data/SA2_NON_DCC.shp') %>% # read data
-  mutate(ID = "000100") %>%
-  mutate(ID_NAME = "Other New Zealand") %>%
-  rename(LAND_AREA = LAND_AREA_) %>%
-  rename(TOT_AREA = AREA_SQ_KM) %>%
-  rename(Shape_Leng = SHAPE_Leng) %>%
-  select(-c("TA2020_V1_", "TA2020_V_1", "TA2020_V_2")) %>%
-  ms_simplify(keep = 0.01) 
-
-SA2_nonDCC <- SA2_nonDCC[c(4,5,1,2,3)]
-```
-
 Read Statistic area shapefile
 ```{r}
-SA2 <- st_read('data/DCC_SA2.shp') %>% # read data
+SA2 <- st_read('raw_data/DCC_SA2.shp') %>% # read data
   #ms_simplify(keep = 0.2) %>% # simplify 
   #st_transform("+proj=longlat +datum=WGS84") %>% # change projection to lat/long
   rename(ID = SA22018_V1) %>%
   rename(ID_NAME = SA22018__1) %>%
   rename(LAND_AREA = LAND_AREA_) %>%
   rename(TOT_AREA = AREA_SQ_KM) %>%
-  ms_simplify(keep = 0.2)
-  
+  ms_simplify(keep = 0.2) %>%
+  filter(!ID %in% c("349500", "350800", "363900"))
+    
+
+
 
 SA2_data <- st_drop_geometry(SA2)  # make a df of just data
 ```
 
-This created two data frames `work_filter` and `res_filter` capturing people who live XOR work in Dunedin.
 
 ```{r}
-Test_id <- 343600
-NON_DCC_ID <- "000100"
-commute_data_na <- commute_data
-commute_data_na[is.na(commute_data_na)] <- 0
+join_residence <- left_join(SA2,commute_data, by = c("ID" = "ID_RES"))
 
+# change NA to zero
+join_residence[is.na(join_residence)] <- 0
 
-# people who live in Dunedin but commute elsewhere
-work_filter <- commute_data_na%>%
-  filter(ID_RES %in% SA2_data$ID) %>%
-  group_by(ID_RES) %>%
-  #filter(ID_RES == Test_id) %>%
-  filter(!ID_WORK %in% SA2_data$ID) %>%
+Dunedin_Commuting_from <- join_residence %>% 
+  st_drop_geometry() %>%
+  group_by(ID) %>%
   summarise(
-    ID_RES = ID_RES,
-    ID_WORK= NON_DCC_ID,
-    Work_at_home = sum(Work_at_home),
-    Drive_a_private_car_truck_or_van = sum(Drive_a_private_car_truck_or_van),
-    Drive_a_company_car_truck_or_van = sum(Drive_a_company_car_truck_or_van),
-    Passenger_in_a_car_truck_van_or_company_bus = sum(Passenger_in_a_car_truck_van_or_company_bus),
-    Public_bus = sum(Public_bus),
-    Train = sum(Train),
-    Bicycle = sum(Bicycle),
-    Walk_or_jog = sum(Walk_or_jog),
-    Ferry = sum(Ferry),
-    Other = sum(Other),
-    Total = sum(Total)) %>%
-  distinct()
-
-# people who live elsewhere but work in Dunedin
-res_filter <- commute_data_na%>%
-  filter(ID_WORK %in% SA2_data$ID) %>%
-  group_by(ID_WORK) %>%
-  #filter(ID_RES == Test_id) %>%
-  filter(!ID_RES %in% SA2_data$ID) %>%
-  summarise(
-    ID_RES = NON_DCC_ID,
-    ID_WORK= ID_WORK,
-    Work_at_home = sum(Work_at_home),
-    Drive_a_private_car_truck_or_van = sum(Drive_a_private_car_truck_or_van),
-    Drive_a_company_car_truck_or_van = sum(Drive_a_company_car_truck_or_van),
-    Passenger_in_a_car_truck_van_or_company_bus = sum(Passenger_in_a_car_truck_van_or_company_bus),
-    Public_bus = sum(Public_bus),
-    Train = sum(Train),
-    Bicycle = sum(Bicycle),
-    Walk_or_jog = sum(Walk_or_jog),
-    Ferry = sum(Ferry),
-    Other = sum(Other),
-    Total = sum(Total)) %>%
-  distinct()
-
-# rearrange column names
-res_filter <- res_filter[c(2,1,3,4,5,6,7,8,9, 10, 11, 12, 13)]
+    Name = ID_NAME, 
+    Drive = sum(Drive_a_private_car_truck_or_van) + sum(Drive_a_company_car_truck_or_van) + sum(Passenger_in_a_car_truck_van_or_company_bus),
+    Bike = sum(Bicycle),
+    Bus = sum(Public_bus),
+    Walk = sum(Walk_or_jog),
+    WFH = sum(Work_at_home), 
+    Total = sum(Total)
+    ) %>%
+  unique()
 ```
 
-Get people who live AND work in Dunedin
 ```{r}
-commute_live_and_work <- commute_data_na %>%
-  filter(ID_RES %in% SA2_data$ID & ID_WORK %in% SA2_data$ID)
-
-commute_clip <- rbind(commute_live_and_work, work_filter) %>%
-  rbind(res_filter)
-```
-
-
-Get truncated SA2
-```{r}
-residence_join <- left_join(commute_data, SA2_data, by = c("ID_RES"= "ID"))
-workplace_join <- left_join(commute_data, SA2_data, by = c("ID_RES"= "ID"))
-
-unique_residence <- unique(residence_join$ID_RES)
-unique_workplace <- unique(workplace_join$ID_WORK)
-
-new <- unique_workplace[!unique_workplace %in% unique_residence]
-new2 <- unique_residence[!unique_residence %in% unique_workplace]
-
-new3 <- SA2_data[!SA2_data$ID %in% commute_data$ID_WORK, ]
-
-new4 <- SA2_data[SA2_data$ID %in% commute_data$ID_WORK, ]
-
-SA2_truncated <- SA2[SA2$ID %in% new4$ID, ]
-
-SA2_combined <- rbind(SA2_truncated, SA2_nonDCC)
-```
-
-
-```{r}
-ggplot(data=SA2_combined) +
-  geom_sf()
-```
-
-SA2_combined has the data I want
-```{r}
-SA2_combined <- SA2_combined %>%
-  #ms_simplify(keep = 0.2) %>% # simplify 
-  st_transform("+proj=longlat +datum=WGS84")  # change projection to lat/long
-```
-
-Coming/going analysis
-```{r}
-workers_coming<-commute_clip %>%
-  group_by(ID_WORK) %>%
-  summarise(coming = sum(Total) - sum(Work_at_home), staying = sum(Work_at_home), total_workers = sum(Total))
-workers_going <-commute_clip %>%
-  group_by(ID_RES) %>%
-  summarise(going = sum(Total) - sum(Work_at_home))
-
-coming_going <- full_join(workers_coming, workers_going, by = c("ID_WORK" = "ID_RES"))%>%
-  mutate(net = coming - going)
-
-```
-
-drop unneeded columns and rename columns
-```{r}
-commute_clip <-
-  commute_clip %>% 
-  rename("Work at Home" = Work_at_home) %>%
-  rename("On foot" = Walk_or_jog) %>%
-  rename("Bus" = Public_bus) %>%
-  rename("Passenger" = Passenger_in_a_car_truck_van_or_company_bus) %>%
-  mutate("Drive" = Drive_a_private_car_truck_or_van + 
-      Drive_a_company_car_truck_or_van) %>%
-  select(-c("Train", 
-    "Ferry", 
-    "Drive_a_private_car_truck_or_van", 
-    "Drive_a_company_car_truck_or_van"))
-```
-
-compute sums and scores
-```{r}
-commuting_from_total_sums <- commute_clip %>%
-  mutate(Drive_all = Drive + Passenger ) %>%
-  summarise(
-    drive_pct_total = sum(Drive_all)/ sum(Total),
-    bus_pct_total = sum(Bus)/ sum(Total),
-    bike_pct_total = sum(Bicycle)/ sum(Total),
-    on_foot_pct_total = sum(`On foot`) / sum(Total),
-    wfh_pct_total = sum(`Work at Home`) /sum(Total)
+# make total
+Dunedin_Summary <- Dunedin_Commuting_from %>%
+  ungroup()%>%
+  summarise(Total_Drive = sum(Drive),
+    Total_Bike = sum(Bike),
+    Total_Bus = sum(Bus),
+    Total_WFH = sum(WFH),
+    Total_Walk = sum(Walk),
+    Total_Total = sum(Total),
+    pct_drive = Total_Drive/ Total_Total,
+    pct_bike = Total_Bike/ Total_Total,
+    pct_WFH = Total_WFH/ Total_Total,
+    pct_Walk = Total_Walk/Total_Total,
+    pct_bus = Total_Bus/Total_Total
     )
 
 
-commuting_from_pcts <- commute_clip %>% 
-  mutate(Drive_all = Drive + Passenger ) %>%
-  group_by(ID_RES) %>%
+Dunedin_Commuting_from_pcts <-Dunedin_Commuting_from %>%
+  ungroup()%>%
   summarise(
-    total_sum = sum(Total),
-    drive_sum = sum(Drive_all),
-    drive_pct = sum(Drive_all)/sum(Total),
-    bus_sum = sum(Bus),
-    bus_pct = sum(Bus)/sum(Total),
-    bike_sum = sum(Bicycle),
-    bike_pct = sum(Bicycle)/sum(Total),
-    onfoot_sum = sum(`On foot`),
-    onfoot_pct = sum(`On foot`)/sum(Total),
-    wfh_sum = sum(`Work at Home`),
-    wfh_pct = sum(`Work at Home`)/sum(Total),
-    ) %>%
-  mutate(
-    drive_ifaverage = commuting_from_total_sums$drive_pct_total * total_sum,
-    bus_ifaverage = commuting_from_total_sums$bus_pct_total * total_sum,
-    bike_ifaverage = commuting_from_total_sums$bike_pct_total * total_sum,
-    onfoot_ifaverage = commuting_from_total_sums$on_foot_pct_total * total_sum,
-    wfh_ifaverage = commuting_from_total_sums$wfh_pct_total * total_sum
-    ) %>%
-  mutate(
-    drive_diff = drive_sum - drive_ifaverage,
-    bus_diff = bus_sum - bus_ifaverage,
-    bike_diff = bike_sum - bike_ifaverage,
-    onfoot_diff = onfoot_sum - onfoot_ifaverage,
-    wfh_diff = wfh_sum - wfh_ifaverage,
-    direction = "from"
-    ) %>%
-  rename(ID = ID_RES)
-
-commuting_to_pcts <- commute_clip %>% 
-  mutate(Drive_all = Drive + Passenger ) %>%
-  group_by(ID_WORK) %>%
-  summarise(
-    total_sum = sum(Total),
-    drive_sum = sum(Drive_all),
-    drive_pct = sum(Drive_all)/sum(Total),
-    bus_sum = sum(Bus),
-    bus_pct = sum(Bus)/sum(Total),
-    bike_sum = sum(Bicycle),
-    bike_pct = sum(Bicycle)/sum(Total),
-    onfoot_sum = sum(`On foot`),
-    onfoot_pct = sum(`On foot`)/sum(Total),
-    wfh_sum = sum(`Work at Home`),
-    wfh_pct = sum(`Work at Home`)/sum(Total),
-    ) %>%
-  mutate(
-    drive_ifaverage = commuting_from_total_sums$drive_pct_total * total_sum,
-    bus_ifaverage = commuting_from_total_sums$bus_pct_total * total_sum,
-    bike_ifaverage = commuting_from_total_sums$bike_pct_total * total_sum,
-    onfoot_ifaverage = commuting_from_total_sums$on_foot_pct_total * total_sum,
-    wfh_ifaverage = commuting_from_total_sums$wfh_pct_total * total_sum
-    ) %>%
-  mutate(
-    drive_diff = drive_sum - drive_ifaverage,
-    bus_diff = bus_sum - bus_ifaverage,
-    bike_diff = bike_sum - bike_ifaverage,
-    onfoot_diff = onfoot_sum - onfoot_ifaverage,
-    wfh_diff = wfh_sum - wfh_ifaverage,
-    direction = "to"
-    ) %>%
-  rename(ID = ID_WORK)
-
-commuting_pcts <-rbind(commuting_from_pcts, commuting_to_pcts)
+    ID = ID,
+#    Name = Name,
+    Total = Total,
+#    Drive = Drive,
+    drive_pct = Drive/Total,
+    bike_pct = Bike/Total,
+    bus_pct = Bus/Total,
+    onfoot_pct = Walk/Total,
+    wfh_pct = WFH/Total,
+    
+    drive_sum = Drive,
+    bike_sum = Bike,
+    bus_sum = Bus,
+    onfoot_sum = Walk,
+    wfh_sum = Drive,
+    
+    drive_ifaverage = Total * (sum(Drive)/sum(Total)),
+    bike_ifaverage = Total * (sum(Bike)/sum(Total)),
+    bus_ifaverage = Total * (sum(Bus)/sum(Total)),
+    onfoot_ifaverage = Total * (sum(Walk)/sum(Total)),
+    wfh_ifaverage = Total * (sum(WFH)/sum(Total)),
+    
+    drive_diff = Drive - drive_ifaverage,
+    bike_diff = Bike - bike_ifaverage,
+    bus_diff = Bus - bus_ifaverage,
+    onfoot_diff = Walk - onfoot_ifaverage,
+    wfh_diff = WFH - wfh_ifaverage,
+  )
 
 
-pivoted_commuting <-commuting_pcts %>%
+pivoted_commuting <-Dunedin_Commuting_from_pcts %>%
   pivot_longer(
-    cols = -c(direction,ID, total_sum),
+    cols = -c(ID, Total),
     names_to = c("mode", "type"),
     names_sep = "_",
     values_to = "value"
   )
 
+pivoted_commuting <- pivoted_commuting %>%
+  rename(total_sum = Total) %>%
+  mutate(direction = "from")
+
+pivoted_commuting <- pivoted_commuting[c(1,2,6,3,4,5)]
 
 ```
 
 
-save data
+test total error
 ```{r}
-st_write(SA2_combined, 'data/SA2_combined.shp', append =FALSE)
-saveRDS(commute_clip, file="data/commute_clip")
-saveRDS(coming_going, file="data/coming_going")
-saveRDS(commuting_pcts, file = "data/commute_pct")
-saveRDS(pivoted_commuting, file = "data/commute_pivot")
+error_test <- join_residence %>% 
+  st_drop_geometry() %>%
+  mutate(
+    total_all_modes = Work_at_home + Drive_a_private_car_truck_or_van + Drive_a_company_car_truck_or_van + Passenger_in_a_car_truck_van_or_company_bus + Public_bus + Train + Bicycle + Walk_or_jog + Ferry + Other,
+    total_tracked_modes = Work_at_home + Drive_a_private_car_truck_or_van + Drive_a_company_car_truck_or_van + Passenger_in_a_car_truck_van_or_company_bus + Public_bus + Bicycle + Walk_or_jog ,
+    Total_diff = Total  -total_all_modes,
+    tracked_diff = total_all_modes -total_tracked_modes
+  )
+
+error_summary <- error_test %>%
+  summarise(
+    Total = sum(Total),
+    Total_diff = sum(Total_diff),
+    tracked_diff = sum(tracked_diff))
 ```
+
+So 	5214 out of 46002 or ~ 11% are not captured in the data here,  I also remove 66 commuting which is 0.1% of all data or 0.2% of the reduced dataset.
+
+
+```{r}
+saveRDS(Dunedin_Summary, file="data/Dunedin_Summary")
+saveRDS(pivoted_commuting, file="data/commute_data")
+```
+
