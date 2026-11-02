@@ -473,7 +473,7 @@ server <- function(input, output, session) {
 
 
         leaflet(data = commute_pivot_join  %>% filter(direction == "from",  mode == input$commuteType, type == "diff")) %>%
-            addProviderTiles(providers$Stamen.TonerLite,
+            addProviderTiles(providers$Esri.WorldGrayCanvas,
                 options = providerTileOptions(noWrap = TRUE)
             ) %>%
 
