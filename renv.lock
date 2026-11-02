@@ -61,6 +61,67 @@
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
       "Repository": "CRAN"
     },
+    "KernSmooth": {
+      "Package": "KernSmooth",
+      "Version": "2.23-26",
+      "Source": "Repository",
+      "Priority": "recommended",
+      "Date": "2024-12-10",
+      "Title": "Functions for Kernel Smoothing Supporting Wand & Jones (1995)",
+      "Authors@R": "c(person(\"Matt\", \"Wand\", role = \"aut\", email = \"Matt.Wand@uts.edu.au\"), person(\"Cleve\", \"Moler\", role = \"ctb\", comment = \"LINPACK routines in src/d*\"), person(\"Brian\", \"Ripley\", role = c(\"trl\", \"cre\", \"ctb\"), email = \"Brian.Ripley@R-project.org\", comment = \"R port and updates\"))",
+      "Note": "Maintainers are not available to give advice on using a package they did not author.",
+      "Depends": [
+        "R (>= 2.5.0)",
+        "stats"
+      ],
+      "Suggests": [
+        "MASS",
+        "carData"
+      ],
+      "Description": "Functions for kernel smoothing (and density estimation) corresponding to the book:  Wand, M.P. and Jones, M.C. (1995) \"Kernel Smoothing\".",
+      "License": "Unlimited",
+      "ByteCompile": "yes",
+      "NeedsCompilation": "yes",
+      "Author": "Matt Wand [aut], Cleve Moler [ctb] (LINPACK routines in src/d*), Brian Ripley [trl, cre, ctb] (R port and updates)",
+      "Maintainer": "Brian Ripley <Brian.Ripley@R-project.org>",
+      "Repository": "CRAN"
+    },
+    "MASS": {
+      "Package": "MASS",
+      "Version": "7.3-65",
+      "Source": "Repository",
+      "Priority": "recommended",
+      "Date": "2025-02-19",
+      "Revision": "$Rev: 3681 $",
+      "Depends": [
+        "R (>= 4.4.0)",
+        "grDevices",
+        "graphics",
+        "stats",
+        "utils"
+      ],
+      "Imports": [
+        "methods"
+      ],
+      "Suggests": [
+        "lattice",
+        "nlme",
+        "nnet",
+        "survival"
+      ],
+      "Authors@R": "c(person(\"Brian\", \"Ripley\", role = c(\"aut\", \"cre\", \"cph\"), email = \"Brian.Ripley@R-project.org\"), person(\"Bill\", \"Venables\", role = c(\"aut\", \"cph\")), person(c(\"Douglas\", \"M.\"), \"Bates\", role = \"ctb\"), person(\"Kurt\", \"Hornik\", role = \"trl\", comment = \"partial port ca 1998\"), person(\"Albrecht\", \"Gebhardt\", role = \"trl\", comment = \"partial port ca 1998\"), person(\"David\", \"Firth\", role = \"ctb\", comment = \"support functions for polr\"))",
+      "Description": "Functions and datasets to support Venables and Ripley, \"Modern Applied Statistics with S\" (4th edition, 2002).",
+      "Title": "Support Functions and Datasets for Venables and Ripley's MASS",
+      "LazyData": "yes",
+      "ByteCompile": "yes",
+      "License": "GPL-2 | GPL-3",
+      "URL": "http://www.stats.ox.ac.uk/pub/MASS4/",
+      "Contact": "<MASS@stats.ox.ac.uk>",
+      "NeedsCompilation": "yes",
+      "Author": "Brian Ripley [aut, cre, cph], Bill Venables [aut, cph], Douglas M. Bates [ctb], Kurt Hornik [trl] (partial port ca 1998), Albrecht Gebhardt [trl] (partial port ca 1998), David Firth [ctb] (support functions for polr)",
+      "Maintainer": "Brian Ripley <Brian.Ripley@R-project.org>",
+      "Repository": "CRAN"
+    },
     "R6": {
       "Package": "R6",
       "Version": "2.6.1",
@@ -380,6 +441,31 @@
       "NeedsCompilation": "yes",
       "Author": "Winston Chang [aut, cre], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Winston Chang <winston@posit.co>",
+      "Repository": "CRAN"
+    },
+    "class": {
+      "Package": "class",
+      "Version": "7.3-23",
+      "Source": "Repository",
+      "Priority": "recommended",
+      "Date": "2025-01-01",
+      "Depends": [
+        "R (>= 3.0.0)",
+        "stats",
+        "utils"
+      ],
+      "Imports": [
+        "MASS"
+      ],
+      "Authors@R": "c(person(\"Brian\", \"Ripley\", role = c(\"aut\", \"cre\", \"cph\"), email = \"Brian.Ripley@R-project.org\"), person(\"William\", \"Venables\", role = \"cph\"))",
+      "Description": "Various functions for classification, including k-nearest neighbour, Learning Vector Quantization and Self-Organizing Maps.",
+      "Title": "Functions for Classification",
+      "ByteCompile": "yes",
+      "License": "GPL-2 | GPL-3",
+      "URL": "http://www.stats.ox.ac.uk/pub/MASS4/",
+      "NeedsCompilation": "yes",
+      "Author": "Brian Ripley [aut, cre, cph], William Venables [cph]",
+      "Maintainer": "Brian Ripley <Brian.Ripley@R-project.org>",
       "Repository": "CRAN"
     },
     "classInt": {
@@ -1452,6 +1538,45 @@
       "NeedsCompilation": "yes",
       "Author": "Winston Chang [aut, cre], Joe Cheng [aut], Charlie Gao [aut] (<https://orcid.org/0000-0002-0750-061X>), Posit Software, PBC [cph], Marcus Geelnard [ctb, cph] (TinyCThread library, https://tinycthread.github.io/), Evan Nemerson [ctb, cph] (TinyCThread library, https://tinycthread.github.io/)",
       "Maintainer": "Winston Chang <winston@posit.co>",
+      "Repository": "CRAN"
+    },
+    "lattice": {
+      "Package": "lattice",
+      "Version": "0.22-7",
+      "Source": "Repository",
+      "Date": "2025-03-31",
+      "Priority": "recommended",
+      "Title": "Trellis Graphics for R",
+      "Authors@R": "c(person(\"Deepayan\", \"Sarkar\", role = c(\"aut\", \"cre\"), email = \"deepayan.sarkar@r-project.org\", comment = c(ORCID = \"0000-0003-4107-1553\")), person(\"Felix\", \"Andrews\", role = \"ctb\"), person(\"Kevin\", \"Wright\", role = \"ctb\", comment = \"documentation\"), person(\"Neil\", \"Klepeis\", role = \"ctb\"), person(\"Johan\", \"Larsson\", role = \"ctb\", comment = \"miscellaneous improvements\"), person(\"Zhijian (Jason)\", \"Wen\", role = \"cph\", comment = \"filled contour code\"), person(\"Paul\", \"Murrell\", role = \"ctb\", email = \"paul@stat.auckland.ac.nz\"), person(\"Stefan\", \"Eng\", role = \"ctb\", comment = \"violin plot improvements\"), person(\"Achim\", \"Zeileis\", role = \"ctb\", comment = \"modern colors\"), person(\"Alexandre\", \"Courtiol\", role = \"ctb\", comment = \"generics for larrows, lpolygon, lrect and lsegments\") )",
+      "Description": "A powerful and elegant high-level data visualization system inspired by Trellis graphics, with an emphasis on multivariate data. Lattice is sufficient for typical graphics needs, and is also flexible enough to handle most nonstandard requirements. See ?Lattice for an introduction.",
+      "Depends": [
+        "R (>= 4.0.0)"
+      ],
+      "Suggests": [
+        "KernSmooth",
+        "MASS",
+        "latticeExtra",
+        "colorspace"
+      ],
+      "Imports": [
+        "grid",
+        "grDevices",
+        "graphics",
+        "stats",
+        "utils"
+      ],
+      "Enhances": [
+        "chron",
+        "zoo"
+      ],
+      "LazyLoad": "yes",
+      "LazyData": "yes",
+      "License": "GPL (>= 2)",
+      "URL": "https://lattice.r-forge.r-project.org/",
+      "BugReports": "https://github.com/deepayan/lattice/issues",
+      "NeedsCompilation": "yes",
+      "Author": "Deepayan Sarkar [aut, cre] (<https://orcid.org/0000-0003-4107-1553>), Felix Andrews [ctb], Kevin Wright [ctb] (documentation), Neil Klepeis [ctb], Johan Larsson [ctb] (miscellaneous improvements), Zhijian (Jason) Wen [cph] (filled contour code), Paul Murrell [ctb], Stefan Eng [ctb] (violin plot improvements), Achim Zeileis [ctb] (modern colors), Alexandre Courtiol [ctb] (generics for larrows, lpolygon, lrect and lsegments)",
+      "Maintainer": "Deepayan Sarkar <deepayan.sarkar@r-project.org>",
       "Repository": "CRAN"
     },
     "leaflet": {
